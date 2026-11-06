@@ -14,6 +14,94 @@ SkillSwap is a full-stack peer-to-peer learning platform for people in Sweden. U
 - PostgreSQL persistence managed by Prisma
 - Docker Compose development and production workflows
 
+## What SkillSwap does
+
+SkillSwap is a peer-to-peer learning marketplace. Every user can be both a
+learner and a teacher: search for a skill, choose a provider, agree on the
+session details, and exchange knowledge using points instead of direct
+payments. The application is designed for local and remote connections in
+Sweden, with Swedish time formatting and seeded examples for software,
+design, business, language, and career skills.
+
+## Dashboard guide
+
+After signing in, the dashboard is the user's control centre:
+
+| Dashboard area | What it does |
+| --- | --- |
+| **Points balance** | Shows the points currently available to pay for accepted exchanges. |
+| **My Exchanges** | Lists every exchange where the user is the requester or provider. Use the tabs to filter all, pending, active, or completed exchanges. |
+| **Pending exchanges** | Shows requests waiting for the other participant. A requester can revoke a pending request; the provider can open it and accept or decline it. |
+| **Active exchanges** | Shows accepted or in-progress sessions. Open an exchange to view its schedule, participants, status, points, and conversation. |
+| **Completed exchanges** | Shows finished learning sessions that can be reviewed and rated. |
+| **Recent Activity** | Displays notifications for new requests, accepted exchanges, messages, point deductions, refunds, and earned points. |
+| **View Messages** | Opens the conversation list for the user's exchanges. |
+| **New Exchange / Find Teachers** | Opens Skill Search, where the user can filter providers by skill, category, location, level, rating, and hourly rate. |
+| **Profile** | Shows the user's bio, location, points, offered skills, ratings, and learning preferences. |
+| **Transactions** | Shows the complete points ledger, including payments, refunds, and points earned from teaching. |
+
+## How an exchange works
+
+1. **Find a skill:** Open **Search**, select a skill or filter, and review the
+   available providers.
+2. **Send a request:** Select **Request Exchange**, choose the skill level,
+   session type, duration, schedule, and description. The application
+   calculates the estimated cost as `hourly rate × duration`.
+3. **Wait for a decision:** The request starts as **Pending**. The provider
+   receives an in-app notification and can accept or decline it.
+4. **Accept and reserve points:** When the request is accepted, the calculated
+   points are deducted from the requester. Points are not deducted when a
+   request is merely created, so declined requests do not charge the requester.
+5. **Hold the session:** Participants use the exchange details page and its
+   conversation to coordinate the learning session. The exchange can move
+   through **Accepted**, **In Progress**, and **Completed**.
+6. **Finish and review:** When the exchange is completed, the provider earns
+   the agreed points and participants can submit ratings and reviews.
+7. **Cancel or revoke:** A pending request can be revoked. If an already
+   accepted exchange is cancelled, the requester's payment is refunded
+   according to the exchange workflow and both participants are notified.
+
+## How points and transactions work
+
+Points are SkillSwap's internal unit for valuing time and keeping an auditable
+record of exchanges. The transaction history is a ledger; it does not charge
+credit cards or connect to a bank.
+
+- **Payment:** created when an exchange is accepted; the requester pays
+  `hourly rate × duration`.
+- **Earned points:** credited to the provider when the teaching exchange is
+  completed.
+- **Refund:** returned to the requester when the application cancels an
+  accepted exchange according to the cancellation workflow.
+- **Balance check:** a requester must have enough points before creating a
+  request.
+- **Transaction History page:** displays the transaction type, amount,
+  related skill, exchange status, description, and date. Positive and
+  negative amounts are shown separately so users can understand every
+  balance change.
+
+The database stores users' balances and transaction records in PostgreSQL.
+Each transaction is linked to its exchange where applicable, allowing the
+history to be traced back to the learning activity that created it.
+
+## How communication works
+
+Communication is tied to an exchange so that participants can keep planning,
+questions, and session details in one place.
+
+- The **Messages** page lists the user's exchanges and opens the relevant
+  conversation.
+- The **Exchange Details** page shows the same conversation together with
+  participants, skill, schedule, duration, hourly rate, status, ratings, and
+  actions.
+- Messages are sent through the authenticated API and saved in PostgreSQL.
+- Socket.IO provides real-time delivery: both participants join an
+  exchange-specific room and receive new messages without refreshing.
+- Notifications are generated for exchange requests, acceptance, messages,
+  point deductions, refunds, and completed activity.
+- A user can only read or send messages for exchanges in which they
+  participate.
+
 ## Technology
 
 | Area | Technology |
@@ -153,9 +241,9 @@ Base URL: `http://localhost:5002/api`
 | Area | Routes |
 | --- | --- |
 | Auth | `/auth/register`, `/auth/login`, `/auth/me`, `/auth/refresh` |
-| Users | `/users/me`, `/users/my-transactions`, `/users/search` |
+| Users | `/users/:id`, `/users/my-transactions`, `/users/search` |
 | Skills | `/skills/available`, `/skills/categories`, `/skills/search`, `/skills/filters` |
-| Exchanges | `/exchanges`, `/exchanges/:id`, `/exchanges/:id/messages`, `/exchanges/:id/status` |
+| Exchanges | `/exchanges`, `/exchanges/my-exchanges`, `/exchanges/:id`, `/exchanges/:id/message`, `/exchanges/:id/status` |
 | Notifications | `/notifications`, `/notifications/unread-count`, `/notifications/:id/read` |
 | Health | `/health` |
 
