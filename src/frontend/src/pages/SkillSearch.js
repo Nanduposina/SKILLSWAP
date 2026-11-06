@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Grid,
@@ -57,11 +57,6 @@ const SkillSearch = () => {
     maxHourlyRate: 100
   });
 
-  useEffect(() => {
-    fetchFilters();
-    fetchTeachers();
-  }, [page]);
-
   const fetchFilters = async () => {
     try {
       const response = await skillsService.getSearchFilters();
@@ -73,7 +68,7 @@ const SkillSearch = () => {
     }
   };
 
-  const fetchTeachers = async (params = {}) => {
+  const fetchTeachers = useCallback(async (params = {}) => {
     setLoading(true);
     setError('');
 
@@ -97,7 +92,12 @@ const SkillSearch = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, searchParams]);
+
+  useEffect(() => {
+    fetchFilters();
+    fetchTeachers();
+  }, [page, fetchTeachers]);
 
   const handleSearch = () => {
     const updatedParams = {
@@ -491,9 +491,5 @@ const SkillSearch = () => {
 };
 
 export default SkillSearch;
-
-
-
-
 
 

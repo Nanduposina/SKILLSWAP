@@ -26,10 +26,7 @@ const markNotificationAsRead = async (req, res) => {
     const { id } = req.params;
     
     // Verify notification belongs to user
-    const notification = await database.db.get(
-      'SELECT * FROM notifications WHERE id = ? AND userId = ?',
-      [id, req.user.userId]
-    );
+    const notification = await database.getNotification(id, req.user.userId);
     
     if (!notification) {
       return res.status(404).json({
@@ -76,15 +73,12 @@ const markAllNotificationsAsRead = async (req, res) => {
 // Get unread notification count
 const getUnreadCount = async (req, res) => {
   try {
-    const result = await database.db.get(
-      'SELECT COUNT(*) as count FROM notifications WHERE userId = ? AND isRead = FALSE',
-      [req.user.userId]
-    );
+    const unreadCount = await database.getUnreadNotificationCount(req.user.userId);
 
     res.json({
       success: true,
       data: {
-        unreadCount: result.count
+        unreadCount
       }
     });
 
@@ -103,10 +97,7 @@ const deleteNotification = async (req, res) => {
     const { id } = req.params;
     
     // Verify notification belongs to user
-    const notification = await database.db.get(
-      'SELECT * FROM notifications WHERE id = ? AND userId = ?',
-      [id, req.user.userId]
-    );
+    const notification = await database.getNotification(id, req.user.userId);
     
     if (!notification) {
       return res.status(404).json({
@@ -115,10 +106,7 @@ const deleteNotification = async (req, res) => {
       });
     }
 
-    await database.db.run(
-      'DELETE FROM notifications WHERE id = ? AND userId = ?',
-      [id, req.user.userId]
-    );
+    await database.deleteNotification(id, req.user.userId);
 
     res.json({
       success: true,

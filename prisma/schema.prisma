@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SkillLevel {
+  Beginner
+  Intermediate
+  Advanced
+  Expert
+}
+
+enum ExchangeStatus {
+  Pending
+  Accepted
+  InProgress @map("In Progress")
+  Completed
+  Cancelled
+}
+
+enum TransactionType {
+  Award
+  Deduction
+  Payment
+}
+
+model User {
+  id                 String              @id @default(uuid())
+  userID             String              @unique
+  name               String
+  email              String              @unique
+  password           String
+  location           String?
+  bio                String?
+  profilePicture     String?
+  pointsBalance      Int                 @default(100)
+  averageRating      Float               @default(0)
+  learningPreferences Json                @default("{\"mode\":\"both\",\"maxDistance\":10}")
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  offeredSkills      UserSkillOffered[]
+  requestedExchanges Exchange[]           @relation("requester")
+  providedExchanges  Exchange[]           @relation("provider")
+  messages           Message[]
+  ratingsGiven       Rating[]             @relation("rater")
+  ratingsReceived    Rating[]             @relation("ratedUser")
+  transactions       Transaction[]
+  notifications      Notification[]
+}
+
+model Skill {
+  id          String              @id @default(uuid())
+  skillID     String              @unique
+  name        String
+  category    String
+  hourlyRate  Float               @default(0)
+  skillLevel  SkillLevel          @default(Beginner)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  offeredBy   UserSkillOffered[]
+  exchanges   Exchange[]
+}
+
+model UserSkillOffered {
+  id          String     @id @default(uuid())
+  userID      String
+  skillID     String
+  skillLevel  SkillLevel @default(Beginner)
+  hourlyRate  Float      @default(0)
+  description String?
+  createdAt   DateTime   @default(now())
+  user        User       @relation(fields: [userID], references: [id], onDelete: Cascade)
+  skill       Skill      @relation(fields: [skillID], references: [id], onDelete: Cascade)
+  @@unique([userID, skillID])
+}
+
+model Exchange {
+  id              String         @id @default(uuid())
+  requesterID     String
+  providerID      String
+  skillID         String
+  skill           String
+  skillLevel      SkillLevel     @default(Beginner)
+  description     String?
+  status          ExchangeStatus @default(Pending)
+  sessionType     String         @default("Exchange")
+  hourlyRate      Float          @default(0)
+  scheduledDate   DateTime?
+  durationHours   Float          @default(1)
+  isMutualExchange Boolean       @default(false)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  requester       User            @relation("requester", fields: [requesterID], references: [id], onDelete: Cascade)
+  provider        User            @relation("provider", fields: [providerID], references: [id], onDelete: Cascade)
+  skillRef        Skill           @relation(fields: [skillID], references: [id], onDelete: Cascade)
+  messages        Message[]
+  ratings         Rating[]
+  transactions    Transaction[]
+}
+
+model Message {
+  id          String   @id @default(uuid())
+  exchangeID  String
+  senderID    String
+  content     String
+  messageType String   @default("text")
+  createdAt   DateTime @default(now())
+  exchange    Exchange @relation(fields: [exchangeID], references: [id], onDelete: Cascade)
+  sender      User     @relation(fields: [senderID], references: [id], onDelete: Cascade)
+}
+
+model Rating {
+  id         String   @id @default(uuid())
+  exchangeID String
+  raterID    String
+  ratedUserID String
+  reviewText String?
+  score      Int
+  createdAt  DateTime @default(now())
+  exchange   Exchange @relation(fields: [exchangeID], references: [id], onDelete: Cascade)
+  rater      User     @relation("rater", fields: [raterID], references: [id], onDelete: Cascade)
+  ratedUser  User     @relation("ratedUser", fields: [ratedUserID], references: [id], onDelete: Cascade)
+  @@unique([exchangeID, raterID])
+}
+
+model Transaction {
+  id              String          @id @default(uuid())
+  userID          String
+  amount          Int
+  transactionType TransactionType
+  description     String?
+  exchangeID      String?
+  createdAt       DateTime        @default(now())
+  user            User            @relation(fields: [userID], references: [id], onDelete: Cascade)
+  exchange        Exchange?       @relation(fields: [exchangeID], references: [id], onDelete: SetNull)
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  data      Json      @default("{}")
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

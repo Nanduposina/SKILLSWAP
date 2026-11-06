@@ -98,11 +98,11 @@ export const SocketProvider = ({ children }) => {
       };
     } else {
       // Clean up socket if user logs out
-      if (socket) {
-        socket.close();
-        setSocket(null);
-        setConnected(false);
-      }
+      setSocket(currentSocket => {
+        currentSocket?.close();
+        return null;
+      });
+      setConnected(false);
     }
   }, [isAuthenticated, user]);
 
@@ -162,7 +162,6 @@ export const SocketProvider = ({ children }) => {
     </SocketContext.Provider>
   );
 };
-
 
 
 

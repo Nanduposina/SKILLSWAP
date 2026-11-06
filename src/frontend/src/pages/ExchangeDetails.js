@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Card,
@@ -51,20 +51,6 @@ const ExchangeDetails = () => {
   const [ratingData, setRatingData] = useState({ score: 5, reviewText: '' });
   const [revokeDialogOpen, setRevokeDialogOpen] = useState(false);
   const messagesEndRef = React.useRef(null);
-
-  useEffect(() => {
-    if (id) {
-      fetchExchangeDetails();
-      joinExchange(id);
-    }
-
-    return () => {
-      // Leave exchange room when component unmounts
-      if (id) {
-        leaveExchange(id);
-      }
-    };
-  }, [id, joinExchange, leaveExchange]);
 
   // Listen for real-time messages from all users (asynchronous messaging)
   useEffect(() => {
@@ -124,7 +110,7 @@ const ExchangeDetails = () => {
     }
   }, [messages]);
 
-  const fetchExchangeDetails = async () => {
+  const fetchExchangeDetails = useCallback(async () => {
     try {
       const response = await exchangesService.getExchangeById(id);
       if (response.success) {
@@ -138,7 +124,20 @@ const ExchangeDetails = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      fetchExchangeDetails();
+      joinExchange(id);
+    }
+
+    return () => {
+      if (id) {
+        leaveExchange(id);
+      }
+    };
+  }, [id, fetchExchangeDetails, joinExchange, leaveExchange]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;

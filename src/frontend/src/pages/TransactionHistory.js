@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -40,11 +40,7 @@ const TransactionHistory = () => {
     pages: 0
   });
 
-  useEffect(() => {
-    fetchTransactions();
-  }, [pagination.page, pagination.limit]);
-
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     try {
       setLoading(true);
       const response = await usersService.getMyTransactions(pagination.page, pagination.limit);
@@ -64,7 +60,11 @@ const TransactionHistory = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.page, pagination.limit]);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, [pagination.page, pagination.limit, fetchTransactions]);
 
   const getTransactionIcon = (amount) => {
     if (amount > 0) {

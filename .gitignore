@@ -9,12 +9,6 @@ src/frontend/node_modules/
 .env.test.local
 .env.production.local
 
-# Database
-database/skillswap.db
-*.db
-*.sqlite
-*.sqlite3
-
 # Logs
 logs/
 *.log

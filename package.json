@@ -10,18 +10,15 @@
     "build": "cd src/frontend && npm run build",
     "install-client": "cd src/frontend && npm install",
     "heroku-postbuild": "npm run install-client && npm run build",
-    "db:reset": "node src/backend/migrations.js reset",
-    "db:migrate": "node src/backend/migrations.js migrate",
-    "db:seed": "node src/backend/migrations.js seed",
-    "test": "jest --config jest.config.js --rootDir .",
-    "test:watch": "jest --config jest.config.js --rootDir . --watch",
-    "test:coverage": "jest --config jest.config.js --rootDir . --coverage",
-    "test:unit": "jest --config jest.config.js --rootDir . --testPathPatterns=tests/unit/.*\\.test\\.js$",
-    "test:integration": "jest --config jest.config.js --rootDir . --testPathPatterns=tests/integration/.*\\.test\\.js$",
-    "test:frontend": "cd src/frontend && npm test -- --coverage --watchAll=false",
-    "test:all": "npm run test:coverage && npm run test:frontend"
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:reset": "prisma migrate reset --force",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run typecheck && npm run build"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -29,39 +26,16 @@
     "express-rate-limit": "^6.10.0",
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.2",
-    "socket.io": "^4.7.2",
-    "sqlite3": "^5.1.7",
-    "uuid": "^9.0.0"
+    "socket.io": "^4.7.2"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.28.3",
-    "@babel/preset-react": "^7.27.1",
-    "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.11.0",
-    "@mui/icons-material": "^5.14.3",
-    "@mui/material": "^5.14.5",
-    "@mui/x-data-grid": "^6.10.1",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^14.6.1",
-    "@types/jest": "^30.0.0",
-    "@types/supertest": "^6.0.3",
-    "axios": "^1.5.0",
-    "babel-jest": "^30.2.0",
-    "identity-obj-proxy": "^3.0.0",
-    "jest": "^30.2.0",
-    "jest-environment-jsdom": "^30.2.0",
-    "jest-environment-node": "^30.2.0",
-    "jsdom": "^27.0.1",
     "nodemon": "^3.0.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^7.9.4",
-    "socket.io-client": "^4.7.2",
-    "supertest": "^7.1.4"
+    "prisma": "^6.19.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=20.0.0"
   },
   "keywords": [
     "skill-sharing",

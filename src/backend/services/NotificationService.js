@@ -234,10 +234,7 @@ class NotificationService {
 
   async notifyUsersByLocation(location, type, title, message, data = {}) {
     try {
-      const users = await database.db.query(
-        'SELECT id FROM users WHERE location LIKE ?',
-        [`%${location}%`]
-      );
+      const users = await database.getUsersByLocation(location);
       
       const notifications = await Promise.all(
         users.map(user => 
@@ -255,4 +252,3 @@ class NotificationService {
 }
 
 module.exports = new NotificationService();
-

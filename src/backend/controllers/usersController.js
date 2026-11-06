@@ -5,7 +5,8 @@ class UsersController {
   async getMyTransactions(req, res) {
     try {
       const userId = req.user.userId;
-      const { page = 1, limit = 50 } = req.query;
+      const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+      const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 50));
       const offset = (page - 1) * limit;
 
       const transactions = await database.getUserTransactions(userId, limit, offset);
@@ -16,8 +17,8 @@ class UsersController {
         data: {
           transactions,
           pagination: {
-            page: parseInt(page),
-            limit: parseInt(limit),
+            page,
+            limit,
             total: totalTransactions,
             pages: Math.ceil(totalTransactions / limit)
           }
