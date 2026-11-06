@@ -167,7 +167,25 @@ Authorization: Bearer <jwt>
 
 ## Verification
 
-Run the type check and production build:
+Start the development stack before running the application smoke tests:
+
+```powershell
+docker compose up -d --build
+npm test
+```
+
+The smoke suite uses Node's built-in test runner and checks:
+
+- API health and Swedish timezone configuration
+- seeded skill, category, filter, and user search endpoints
+- demo login, protected routes, and token refresh
+- exchanges, messages, transactions, and notifications
+- frontend serving every application route
+
+Set `SKILLSWAP_API_URL` or `SKILLSWAP_WEB_URL` to test another running
+environment.
+
+Run the type check and production build separately:
 
 ```powershell
 npm run verify
